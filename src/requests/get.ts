@@ -8,12 +8,12 @@ const getAllDevelopers = async (
 	response: Response
 ): Promise<Response> => {
 	const queryText: string = `
-        SELECT  
-            *
-        FROM 
-            developer dev
-        LEFT JOIN 
-            developer_infos dev_infos ON dev."developerID" = dev_infos."developerID";
+		SELECT  
+			d."developerID", d.name, d.email, di."developerInfoID", di."developerSince", di."preferredOS"  
+		FROM 
+			developer d 
+		LEFT JOIN 
+			developer_infos di  ON d."developerID" = di."developerID";
     `;
 
 	const queryConfig: QueryConfig = {
@@ -32,12 +32,14 @@ const getDeveloper = async (
 	const id: number = parseInt(request.params.id);
 
 	const queryText: string = `
-        SELECT  
-            *
-        FROM 
-            developer
+		SELECT  
+			d."developerID", d.name, d.email, di."developerInfoID", di."developerSince", di."preferredOS"  
+		FROM 
+			developer d 
+		LEFT JOIN 
+			developer_infos di  ON d."developerID" = di."developerID"
         WHERE 
-            "developerID" = $1;
+            d."developerID" = $1;
     `;
 
 	const queryConfig: QueryConfig = {

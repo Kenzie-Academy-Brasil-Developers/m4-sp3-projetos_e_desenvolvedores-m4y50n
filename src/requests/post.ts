@@ -1,14 +1,16 @@
 import { Request, Response } from "express";
+import { QueryResult } from "pg";
 import format from "pg-format";
 import { client } from "../database";
+import { iDeveloper } from "../interfaces";
 
 //developers
 const postDeveloper = async (
 	request: Request,
 	response: Response
 ): Promise<Response> => {
-	const developerDataKey: any = Object.keys(request.body),
-		developerDataValues: any = Object.values(request.body);
+	const developerDataKey: Array<string> = Object.keys(request.validatedBody),
+		developerDataValues: Array<string> = Object.values(request.validatedBody);
 
 	const queryText: string = `
         INSERT INTO  
@@ -22,7 +24,7 @@ const postDeveloper = async (
 
 	const queryConfig = format(queryText, ...queryValues);
 
-	const queryResult: any = await client.query(queryConfig);
+	const queryResult: QueryResult<iDeveloper> = await client.query(queryConfig);
 
 	return response.status(201).json(queryResult.rows[0]);
 };
@@ -31,8 +33,10 @@ const postDeveloperInfos = async (
 	request: Request,
 	response: Response
 ): Promise<Response> => {
-	const developerDataKey: any = Object.keys(request.body),
-		developerDataValues: any = Object.values(request.body);
+	const developerDataKey: Array<string> = Object.keys(request.validatedBody),
+		developerDataValues: Array<string | number> = Object.values(
+			request.validatedBody
+		);
 
 	const queryText: string = `
 		INSERT INTO  
@@ -46,7 +50,7 @@ const postDeveloperInfos = async (
 
 	const queryConfig = format(queryText, ...queryValues);
 
-	const queryResult: any = await client.query(queryConfig);
+	const queryResult: QueryResult<any> = await client.query(queryConfig);
 
 	return response.status(201).json(queryResult.rows[0]);
 };
@@ -56,8 +60,8 @@ const postProject = async (
 	request: Request,
 	response: Response
 ): Promise<Response> => {
-	const developerDataKey: any = Object.keys(request.body),
-		developerDataValues: any = Object.values(request.body);
+	const developerDataKey: Array<string> = Object.keys(request.validatedBody),
+		developerDataValues: Array<string> = Object.values(request.validatedBody);
 
 	const queryText: string = `
 		INSERT INTO  
@@ -76,4 +80,34 @@ const postProject = async (
 	return response.status(201).json(queryResult.rows[0]);
 };
 
-export { postDeveloper, postDeveloperInfos, postProject };
+//technologies
+const postTechProject = async (
+	request: Request,
+	response: Response
+): Promise<Response> => {
+	const id: number = parseInt(request.params.id);
+
+	const developerDataKey: Array<string> = Object.keys(request.validatedBody),
+		developerDataValues: Array<string> = Object.values(request.validatedBody);
+
+	const queryText: string = `
+		INSERT INTO 
+			project_technology(%I) 
+		VALUES 
+			(%L)
+		RETURNING *;
+	`;
+
+	const queryValues = [
+		[...developerDataKey, "projectID"],
+		[...developerDataValues, id],
+	];
+
+	const queryConfig = format(queryText, ...queryValues);
+
+	const queryResult: any = await client.query(queryConfig);
+
+	return response.status(201).json(queryResult.rows[0]);
+};
+
+export { postDeveloper, postDeveloperInfos, postProject, postTechProject };

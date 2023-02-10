@@ -1,10 +1,14 @@
 import express, { Application, json } from "express";
 import { startDatabase } from "./database";
 
-import * as getRequests from "./requests/get";
-import * as postRequests from "./requests/post";
-import * as patchRequests from "./requests/patch";
-import * as deleteRequests from "./requests/delete";
+import { removeExtraKeys } from "./middlewares";
+
+import {
+	getRequests,
+	postRequests,
+	patchRequests,
+	deleteRequests,
+} from "./requests";
 
 //call express
 const app: Application = express();
@@ -18,8 +22,12 @@ app.get("/developers", getRequests.getAllDevelopers);
 
 app.get("/developers/:id", getRequests.getDeveloper);
 
-app.post("/developers", postRequests.postDeveloper);
-app.post("/developers/:id/infos", postRequests.postDeveloperInfos);
+app.post("/developers", removeExtraKeys, postRequests.postDeveloper);
+app.post(
+	"/developers/:id/infos",
+	removeExtraKeys,
+	postRequests.postDeveloperInfos
+);
 
 app.patch("/developers/:id", patchRequests.patchDeveloper);
 app.patch("/developers/:id/infos", patchRequests.patchDeveloperInfos);
@@ -30,11 +38,20 @@ app.delete("/developers/:id", deleteRequests.deleteDeveloper);
 app.get("/projects", getRequests.getAllProjects);
 app.get("/projects/:id", getRequests.getProject);
 
-app.post("/projects", postRequests.postProject);
+app.post("/projects", removeExtraKeys, postRequests.postProject);
+app.post(
+	"/projects/:id/technologies",
+	removeExtraKeys,
+	postRequests.postTechProject
+);
 
 app.patch("/projects/:id", patchRequests.patchProject);
 
 app.delete("/projects/:id", deleteRequests.deleteProject);
+app.delete(
+	"/projects/:id/technologies/:name",
+	deleteRequests.deleteTechProject
+);
 
 app.listen(PORT, async () => {
 	await startDatabase();

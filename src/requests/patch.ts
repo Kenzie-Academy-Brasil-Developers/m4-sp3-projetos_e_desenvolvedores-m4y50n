@@ -10,8 +10,8 @@ const patchDeveloper = async (
 ): Promise<Response> => {
 	const id: number = parseInt(request.params.id);
 
-	const developerDataKey: any = Object.keys(request.body),
-		developerDataValues: any = Object.values(request.body);
+	const developerDataKey: any = Object.keys(request.validatedBody),
+		developerDataValues: any = Object.values(request.validatedBody);
 
 	const queryText: string = `
 		UPDATE
@@ -40,8 +40,8 @@ const patchDeveloperInfos = async (
 ): Promise<Response> => {
 	const id: number = parseInt(request.params.id);
 
-	const developerDataKey: any = Object.keys(request.body),
-		developerDataValues: any = Object.values(request.body);
+	const developerDataKey: any = Object.keys(request.validatedBody),
+		developerDataValues: any = Object.values(request.validatedBody);
 
 	const queryText: string = `
 	UPDATE
@@ -71,8 +71,8 @@ const patchProject = async (
 ): Promise<Response> => {
 	const id: number = parseInt(request.params.id);
 
-	const developerDataKey: any = Object.keys(request.body),
-		developerDataValues: any = Object.values(request.body);
+	const developerDataKey: any = Object.keys(request.validatedBody),
+		developerDataValues: any = Object.values(request.validatedBody);
 
 	const queryText: string = `
 		UPDATE
