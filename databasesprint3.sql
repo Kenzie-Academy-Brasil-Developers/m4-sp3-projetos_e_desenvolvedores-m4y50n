@@ -1,38 +1,44 @@
 CREATE DATABASE databasesprint3;
 
+CREATE TYPE os AS ENUM ('windows', 'linux', 'macos');
+
+CREATE TABLE IF NOT EXISTS developer (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(50) NOT NULL,
+    email VARCHAR(50) NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS developer_infos (
-    id SERIAL;
-    "developerSince" DATE NOT NULL;
-    "preferedOS" VARCHAR NOT NULL;
+    id SERIAL PRIMARY KEY,
+    "developerSince" DATE NOT NULL,
+    "preferedOS" os,
+    "developerID" INTEGER UNIQUE,
+    FOREIGN KEY ("developerID") REFERENCES developer(id) ON DELETE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS developers (
-    id SERIAL;
-    name VARCHAR(50) NOT NULL;
-    email VARCHAR(50) NOT NULL;
-    "developerInfoID" INT REFERENCES developer_infos("id")
-    "developerSince" DATE REFERENCES developer_infos("developerSince");
-    "preferedOS" VARCHAR REFERENCES developer_infos("preferedOS");
-);
-
-CREATE TABLE IF NOT EXISTS projets (
-    id SERIAL;
-    name VARCHAR(50) NOT NULL;
-    description TEXT NOT NULL;
-    "estimatedTime" VARCHAR(20) NOT NULL;
-    repository VARCHAR(120) NOT NULL;
-    "startDate" DATE NOT NULL;
-    "endDate" DATE;
+CREATE TABLE IF NOT EXISTS projects (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(50) NOT NULL,
+    description TEXT,
+    "estimatedTime" VARCHAR(20) NOT NULL,
+    repository VARCHAR(120) NOT NULL,
+    "startDate" DATE NOT NULL,
+    "endDate" DATE,
+    "developerID" INTEGER UNIQUE,
+    FOREIGN KEY ("developerID") REFERENCES developer(id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS technologies (
-    id SERIAL;
-    name VARCHAR(30) NOT NULL;
-    "techList" ARRAY[];
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(30) NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS projects_technologies (
-    id SERIAL;
-    "addedIn" DATE NOT NULL;
+    id SERIAL PRIMARY KEY,
+    "addedIn" DATE NOT NULL,
+    "projectID" INTEGER UNIQUE,
+    FOREIGN KEY ("projectID") REFERENCES projects(id) ON DELETE CASCADE,
+    "technologiesID" INTEGER UNIQUE,
+    FOREIGN KEY ("technologiesID") REFERENCES technologies(id) ON DELETE CASCADE
 );
 
