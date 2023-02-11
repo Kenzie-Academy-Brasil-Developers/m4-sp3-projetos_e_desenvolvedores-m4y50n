@@ -1,3 +1,3 @@
-import { validateKeys } from "./validations";
+import { validateKeys, verifyId, verifyTech } from "./validations";
 
-export { validateKeys };
+export { validateKeys, verifyId, verifyTech };
