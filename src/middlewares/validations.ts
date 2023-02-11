@@ -1,55 +1,41 @@
 import { NextFunction, Request, Response } from "express";
 
-const removeExtraKeys = async (
+const validateKeys = async (
 	request: Request,
 	response: Response,
 	next: NextFunction
 ): Promise<Response | void> => {
-	const requestPath = request.route.path;
+	const validKeys = [
+		"name",
+		"email",
+		"description",
+		"estimatedTime",
+		"startDate",
+		"repository",
+		"developerID",
+		"developerSince",
+		"preferredOS",
+		"addedIn",
+		"techID",
+	];
 
-	if (requestPath === "/developers") {
-		const { name, email } = request.body;
+	const { body } = request;
 
-		request.validatedBody = {
-			name,
-			email,
-		};
-	} else if (requestPath === "/developers/:id/infos") {
-		const { developerSince, preferredOS } = request.body,
-			developerID = parseInt(request.params.id);
+	const keys = Object.keys(body);
 
-		request.validatedBody = {
-			developerSince,
-			preferredOS,
-			developerID,
-		};
-	} else if (requestPath === "/projects") {
-		const {
-			name,
-			description,
-			estimatedTime,
-			startDate,
-			repository,
-			developerID,
-		} = request.body;
+	const newBody: any = {};
 
-		request.validatedBody = {
-			name,
-			description,
-			estimatedTime,
-			startDate,
-			repository,
-			developerID,
-		};
-	} else if (requestPath === "/projects/:id/technologies") {
-		const { addedIn, techID } = request.body;
+	keys.forEach((key: any) => {
+		if (validKeys.includes(key)) {
+			newBody[key] = body[key];
+		}
+	});
 
-		request.validatedBody = {
-			addedIn,
-			techID,
-		};
-	}
+	request.validatedBody = {
+		...newBody,
+	};
+
 	return next();
 };
 
-export { removeExtraKeys };
+export { validateKeys };

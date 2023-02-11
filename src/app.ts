@@ -1,7 +1,7 @@
 import express, { Application, json } from "express";
 import { startDatabase } from "./database";
 
-import { removeExtraKeys } from "./middlewares";
+import { validateKeys } from "./middlewares";
 
 import {
 	getRequests,
@@ -22,15 +22,19 @@ app.get("/developers", getRequests.getAllDevelopers);
 
 app.get("/developers/:id", getRequests.getDeveloper);
 
-app.post("/developers", removeExtraKeys, postRequests.postDeveloper);
+app.post("/developers", validateKeys, postRequests.postDeveloper);
 app.post(
 	"/developers/:id/infos",
-	removeExtraKeys,
+	validateKeys,
 	postRequests.postDeveloperInfos
 );
 
-app.patch("/developers/:id", patchRequests.patchDeveloper);
-app.patch("/developers/:id/infos", patchRequests.patchDeveloperInfos);
+app.patch("/developers/:id", validateKeys, patchRequests.patchDeveloper);
+app.patch(
+	"/developers/:id/infos",
+	validateKeys,
+	patchRequests.patchDeveloperInfos
+);
 
 app.delete("/developers/:id", deleteRequests.deleteDeveloper);
 
@@ -38,14 +42,14 @@ app.delete("/developers/:id", deleteRequests.deleteDeveloper);
 app.get("/projects", getRequests.getAllProjects);
 app.get("/projects/:id", getRequests.getProject);
 
-app.post("/projects", removeExtraKeys, postRequests.postProject);
+app.post("/projects", validateKeys, postRequests.postProject);
 app.post(
 	"/projects/:id/technologies",
-	removeExtraKeys,
+	validateKeys,
 	postRequests.postTechProject
 );
 
-app.patch("/projects/:id", patchRequests.patchProject);
+app.patch("/projects/:id", validateKeys, patchRequests.patchProject);
 
 app.delete("/projects/:id", deleteRequests.deleteProject);
 app.delete(

@@ -1,3 +1,3 @@
-import { removeExtraKeys } from "./validations";
+import { validateKeys } from "./validations";
 
-export { removeExtraKeys };
+export { validateKeys };
