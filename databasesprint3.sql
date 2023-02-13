@@ -26,13 +26,7 @@ CREATE TABLE IF NOT EXISTS project (
     "endDate" DATE,
     "developerID" INTEGER NOT NULL,
     FOREIGN KEY ("developerID") REFERENCES developer("developerID") ON DELETE CASCADE
-);
-
-INSERT INTO 
-	project(name, description, "estimatedTime", repository, "startDate", "developerID")
-VALUES
-	('Projeto 1', 'projeto full stack', '2 dias', 'url.com.br', '02/13/2023', 1);	
-	
+);	
 
 CREATE TABLE IF NOT EXISTS technology (
     "techID" SERIAL PRIMARY KEY,
@@ -48,12 +42,6 @@ CREATE TABLE IF NOT EXISTS project_technology (
     FOREIGN KEY ("techID") REFERENCES technology("techID") ON DELETE CASCADE
 );
 
-
-INSERT INTO 
-	project_technology ("addedIn", "projectID", "techID") 
-VALUES 
-	('02/23/2023', 1, 2);
-
 INSERT INTO 
 		technology(name)
 VALUES 
@@ -67,13 +55,3 @@ VALUES
 		('postgresql'),
 		('mongodb');
 
-
-INSERT INTO 
-	developer(name, email) 
-VALUES 
-	('Fabio', 'fabio.jr@kenzie.com.br');
-
-INSERT INTO 
-	developer_infos("developerSince", "preferredOS", "developerID") 
-VALUES 
-	('01/10/2021', 'windows', 1)
