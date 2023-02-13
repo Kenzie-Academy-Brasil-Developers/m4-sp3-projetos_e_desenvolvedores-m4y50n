@@ -1,3 +1,21 @@
-import { validateKeys, verifyId, verifyTech } from "./validations";
+import {
+	validateKeys,
+	verifyId,
+	verifyTech,
+	emailDuplicated,
+	validateRequiredDevKeys,
+	validateRequiredInfosKeys,
+	validateRequiredProjKeys,
+	validateRequiredTechKeys,
+} from "./validations";
 
-export { validateKeys, verifyId, verifyTech };
+export {
+	validateKeys,
+	verifyId,
+	verifyTech,
+	emailDuplicated,
+	validateRequiredDevKeys,
+	validateRequiredInfosKeys,
+	validateRequiredProjKeys,
+	validateRequiredTechKeys,
+};

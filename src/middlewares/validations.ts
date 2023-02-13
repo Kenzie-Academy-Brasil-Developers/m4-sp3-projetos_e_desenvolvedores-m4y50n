@@ -2,12 +2,8 @@ import { NextFunction, Request, Response } from "express";
 import { QueryConfig, QueryResult } from "pg";
 import { client } from "../database";
 
-const validateKeys = async (
-	request: Request,
-	response: Response,
-	next: NextFunction
-): Promise<Response | void> => {
-	const validKeys = [
+//valid keys
+const validKeys: string[] = [
 		"name",
 		"email",
 		"description",
@@ -19,8 +15,25 @@ const validateKeys = async (
 		"preferredOS",
 		"addedIn",
 		"techID",
-	];
+	],
+	validKeysDev: string[] = ["name", "email"],
+	validKeysInfos: string[] = ["developerSince", "preferredOS"],
+	validKeysProj: string[] = [
+		"name",
+		"description",
+		"estimatedTime",
+		"startDate",
+		"repository",
+		"developerID",
+	],
+	validKeysTech: string[] = ["addedIn", "techID"];
 
+//validate keys
+const validateKeys = async (
+	request: Request,
+	response: Response,
+	next: NextFunction
+): Promise<Response | void> => {
 	const { body } = request;
 
 	const keys = Object.keys(body);
@@ -40,6 +53,7 @@ const validateKeys = async (
 	return next();
 };
 
+//verify id
 const verifyId = async (
 	request: Request,
 	response: Response,
@@ -87,6 +101,7 @@ const verifyId = async (
 	return next();
 };
 
+//verify tech
 const verifyTech = async (
 	request: Request,
 	response: Response,
@@ -116,4 +131,130 @@ const verifyTech = async (
 	return next();
 };
 
-export { validateKeys, verifyId, verifyTech };
+//verify email
+const emailDuplicated = async (
+	request: Request,
+	response: Response,
+	next: NextFunction
+): Promise<Response | void> => {
+	const { body } = request;
+
+	if (body.email) {
+		const queryResul: any = await client.query({
+			text: "SELECT * FROM developer d WHERE  email = $1",
+			values: [body.email],
+		});
+
+		if (queryResul.rows.length) {
+			return response.status(409).json({ message: "Email already exists." });
+		}
+	}
+
+	return next();
+};
+
+//validate required keys
+const validateRequiredDevKeys = async (
+	request: Request,
+	response: Response,
+	next: NextFunction
+): Promise<Response | void> => {
+	const { body, method } = request;
+
+	if (method.toLowerCase() === "post") {
+		if (!validKeysDev.every((key: string) => Object.keys(body).includes(key))) {
+			return response
+				.status(400)
+				.json({ message: `Missing required keys: ${validKeysDev.join(", ")}` });
+		}
+	} else if (method.toLowerCase() === "patch") {
+		if (!validKeysDev.some((key: string) => Object.keys(body).includes(key))) {
+			return response
+				.status(400)
+				.json({ message: `Missing required keys: ${validKeysDev.join(", ")}` });
+		}
+	}
+
+	return next();
+};
+
+const validateRequiredInfosKeys = async (
+	request: Request,
+	response: Response,
+	next: NextFunction
+): Promise<Response | void> => {
+	const { body, method } = request;
+
+	if (method.toLowerCase() === "post") {
+		if (
+			!validKeysInfos.every((key: string) => Object.keys(body).includes(key))
+		) {
+			return response.status(400).json({
+				message: `Missing required keys: ${validKeysInfos.join(", ")}`,
+			});
+		}
+	} else if (method.toLowerCase() === "patch") {
+		if (
+			!validKeysInfos.some((key: string) => Object.keys(body).includes(key))
+		) {
+			return response.status(400).json({
+				message: `Missing required keys: ${validKeysInfos.join(", ")}`,
+			});
+		}
+	}
+
+	return next();
+};
+
+const validateRequiredProjKeys = async (
+	request: Request,
+	response: Response,
+	next: NextFunction
+): Promise<Response | void> => {
+	const { body, method } = request;
+
+	if (method.toLowerCase() === "post") {
+		if (
+			!validKeysProj.every((key: string) => Object.keys(body).includes(key))
+		) {
+			return response.status(400).json({
+				message: `Missing required keys: ${validKeysProj.join(", ")}`,
+			});
+		}
+	} else if (method.toLowerCase() === "patch") {
+		if (!validKeysProj.some((key: string) => Object.keys(body).includes(key))) {
+			return response.status(400).json({
+				message: `Missing required keys: ${validKeysProj.join(", ")}`,
+			});
+		}
+	}
+
+	return next();
+};
+
+const validateRequiredTechKeys = async (
+	request: Request,
+	response: Response,
+	next: NextFunction
+): Promise<Response | void> => {
+	const { body } = request;
+
+	if (!validKeysTech.every((key: string) => Object.keys(body).includes(key))) {
+		return response.status(400).json({
+			message: `Missing required keys: ${validKeysTech.join(", ")}`,
+		});
+	}
+
+	return next();
+};
+
+export {
+	validateKeys,
+	verifyId,
+	verifyTech,
+	emailDuplicated,
+	validateRequiredDevKeys,
+	validateRequiredInfosKeys,
+	validateRequiredProjKeys,
+	validateRequiredTechKeys,
+};

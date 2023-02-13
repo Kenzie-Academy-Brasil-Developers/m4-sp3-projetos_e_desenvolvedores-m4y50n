@@ -90,6 +90,23 @@ const postTechProject = async (
 	const developerDataKey: Array<string> = Object.keys(request.validatedBody),
 		developerDataValues: Array<string> = Object.values(request.validatedBody);
 
+	//verify if tech is in project
+	const queryVerify: any = await client.query({
+		text: `SELECT t."name" from 
+		project p
+		LEFT JOIN 
+		project_technology pt on p."projectID" = pt."projectID"
+		LEFT  JOIN   
+		technology t on t."techID" = pt."techID"
+		WHERE t."techID" = $1;`,
+		values: [request.validatedBody.techID],
+	});
+
+	if (queryVerify.rows.length) {
+		return response.status(409).json({ message: "Tech already in project" });
+	}
+	////////////
+
 	const queryText: string = `
 		INSERT INTO 
 			project_technology(%I) 
