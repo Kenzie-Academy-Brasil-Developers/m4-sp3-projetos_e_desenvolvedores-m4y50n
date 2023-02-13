@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { QueryConfig, QueryResult } from "pg";
 import { client } from "../database";
-import { iValidateBody } from "../interfaces";
+import { iDeveloper, iProject, iTech } from "../interfaces";
 
 //valid keys
 const validKeys: string[] = [
@@ -92,7 +92,9 @@ const verifyId = async (
 		values: [id],
 	};
 
-	const queryResult: QueryResult = await client.query(queryConfig);
+	const queryResult: QueryResult<iDeveloper | iProject> = await client.query(
+		queryConfig
+	);
 
 	if (!queryResult.rows.length && table === "developers") {
 		return response.status(400).json({ message: "Developer not found." });
@@ -124,7 +126,7 @@ const verifyTech = async (
 		values: [name],
 	};
 
-	const queryResult: any = await client.query(querySelectConfig);
+	const queryResult: QueryResult<iTech> = await client.query(querySelectConfig);
 
 	if (!queryResult.rows[0]) {
 		return response.status(400).json({ message: "Tech not found." });
@@ -142,7 +144,7 @@ const emailDuplicated = async (
 	const { body } = request;
 
 	if (body.email) {
-		const queryResul: any = await client.query({
+		const queryResul: QueryResult<iDeveloper> = await client.query({
 			text: "SELECT * FROM developer d WHERE  email = $1",
 			values: [body.email],
 		});

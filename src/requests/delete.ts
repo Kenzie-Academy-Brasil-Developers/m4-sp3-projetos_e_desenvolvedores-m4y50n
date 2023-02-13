@@ -18,9 +18,9 @@ const deleteDeveloper = async (
 
 	const queryConfig: QueryConfig = { text: queryText, values: [id] };
 
-	const queryResult: any = await client.query(queryConfig);
+	await client.query(queryConfig);
 
-	return response.status(204).json(queryResult.rows[0]);
+	return response.status(204).send();
 };
 
 //project
@@ -39,9 +39,9 @@ const deleteProject = async (
 
 	const queryConfig: QueryConfig = { text: queryText, values: [id] };
 
-	const queryResult: any = await client.query(queryConfig);
+	await client.query(queryConfig);
 
-	return response.status(204).json(queryResult.rows[0]);
+	return response.status(204).send();
 };
 
 //technologies
@@ -64,9 +64,9 @@ const deleteTechProject = async (
 		values: [id, techID],
 	};
 
-	const queryResult: any = await client.query(queryConfig);
+	await client.query(queryConfig);
 
-	return response.status(204).json(queryResult.rows[0]);
+	return response.status(204).send();
 };
 
 export { deleteDeveloper, deleteProject, deleteTechProject };
