@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
-import { QueryConfig } from "pg";
+import { QueryConfig, QueryResult } from "pg";
 import { client } from "../database";
+import { iDeveloperInfos, iProject } from "../interfaces";
 
 //developers
 const getAllDevelopers = async (
@@ -20,7 +21,9 @@ const getAllDevelopers = async (
 		text: queryText,
 	};
 
-	const queryResult: any = await client.query(queryConfig);
+	const queryResult: QueryResult<iDeveloperInfos[]> = await client.query(
+		queryConfig
+	);
 
 	return response.status(200).json(queryResult.rows);
 };
@@ -47,7 +50,9 @@ const getDeveloper = async (
 		values: [id],
 	};
 
-	const queryResult: any = await client.query(queryConfig);
+	const queryResult: QueryResult<iDeveloperInfos> = await client.query(
+		queryConfig
+	);
 
 	return response.status(200).json(queryResult.rows[0]);
 };
@@ -73,7 +78,7 @@ const getAllProjects = async (
 		text: queryText,
 	};
 
-	const queryResult: any = await client.query(queryConfig);
+	const queryResult: QueryResult<iProject> = await client.query(queryConfig);
 
 	return response.status(200).json(queryResult.rows);
 };

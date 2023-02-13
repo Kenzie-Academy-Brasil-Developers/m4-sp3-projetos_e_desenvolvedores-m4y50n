@@ -1,8 +1,15 @@
 import { Request, Response } from "express";
-import { QueryResult } from "pg";
+import { QueryConfig, QueryResult } from "pg";
 import format from "pg-format";
 import { client } from "../database";
-import { iDeveloper } from "../interfaces";
+import {
+	iDeveloper,
+	iDeveloperInfosID,
+	iInfos,
+	iProject,
+	iProjectTech,
+	iTech,
+} from "../interfaces";
 
 //developers
 const postDeveloper = async (
@@ -26,13 +33,23 @@ const postDeveloper = async (
 
 	const queryResult: QueryResult<iDeveloper> = await client.query(queryConfig);
 
-	return response.status(201).json(queryResult.rows[0]);
+	const developerInfoID: QueryResult<iDeveloperInfosID> = await client.query({
+		text: `
+			SELECT d."developerID", d.name, d.email, di."developerInfoID"  FROM developer  d 
+			LEFT JOIN developer_infos di ON d."developerID" = di."developerID" WHERE d."developerID" = $1;
+			`,
+		values: [queryResult.rows[0].developerID],
+	});
+
+	return response.status(201).json(developerInfoID.rows[0]);
 };
 
 const postDeveloperInfos = async (
 	request: Request,
 	response: Response
 ): Promise<Response> => {
+	const id: number = parseInt(request.params.id);
+
 	const developerDataKey: Array<string> = Object.keys(request.validatedBody),
 		developerDataValues: Array<string | number> = Object.values(
 			request.validatedBody
@@ -46,11 +63,14 @@ const postDeveloperInfos = async (
 		RETURNING *;
 	`;
 
-	const queryValues = [developerDataKey, developerDataValues];
+	const queryValues = [
+		[...developerDataKey, "developerID"],
+		[...developerDataValues, id],
+	];
 
 	const queryConfig = format(queryText, ...queryValues);
 
-	const queryResult: QueryResult<any> = await client.query(queryConfig);
+	const queryResult: QueryResult<iInfos> = await client.query(queryConfig);
 
 	return response.status(201).json(queryResult.rows[0]);
 };
@@ -75,7 +95,7 @@ const postProject = async (
 
 	const queryConfig = format(queryText, ...queryValues);
 
-	const queryResult: any = await client.query(queryConfig);
+	const queryResult: QueryResult<iProject> = await client.query(queryConfig);
 
 	return response.status(201).json(queryResult.rows[0]);
 };
@@ -91,18 +111,24 @@ const postTechProject = async (
 		developerDataValues: Array<string> = Object.values(request.validatedBody);
 
 	//verify if tech is in project
-	const queryVerify: any = await client.query({
-		text: `SELECT t."name" from 
-		project p
+	const queryVerifyName: QueryResult<string[]> = await client.query({
+		text: `
+		SELECT 
+			pro."projectID", pro.name, pro.description, pro."estimatedTime", pro.repository, 
+			pro."startDate", pro."endDate", pro."developerID", t."techID", t."name" as "techName"  
+		FROM 
+			project pro
 		LEFT JOIN 
-		project_technology pt on p."projectID" = pt."projectID"
+			project_technology pt on pro."projectID" = pt."projectID"
 		LEFT  JOIN   
-		technology t on t."techID" = pt."techID"
-		WHERE t."techID" = $1;`,
-		values: [request.validatedBody.techID],
+			technology t on t."techID" = pt."techID"
+		WHERE 
+			t."techID" = $1 and pt."projectID" = $2;`,
+
+		values: [request.validatedBody.techID, id],
 	});
 
-	if (queryVerify.rows.length) {
+	if (queryVerifyName.rows.length) {
 		return response.status(409).json({ message: "Tech already in project" });
 	}
 	////////////
@@ -122,9 +148,25 @@ const postTechProject = async (
 
 	const queryConfig = format(queryText, ...queryValues);
 
-	const queryResult: any = await client.query(queryConfig);
+	await client.query(queryConfig);
 
-	return response.status(201).json(queryResult.rows[0]);
+	const queryTechInfo: QueryResult<iProjectTech> = await client.query({
+		text: `
+		SELECT 
+			pro."projectID", pro.name, pro.description, pro."estimatedTime", pro.repository, 
+			pro."startDate", pro."endDate", pro."developerID", t."techID", t."name" as "techName"  
+		FROM 
+			project pro
+		LEFT JOIN 
+			project_technology pt on pro."projectID" = pt."projectID"
+		LEFT  JOIN   
+			technology t on t."techID" = pt."techID"
+		WHERE 
+			t."techID" = $1 and pt."projectID" = $2;`,
+		values: [request.validatedBody.techID, id],
+	});
+
+	return response.status(201).json(queryTechInfo.rows[0]);
 };
 
 export { postDeveloper, postDeveloperInfos, postProject, postTechProject };

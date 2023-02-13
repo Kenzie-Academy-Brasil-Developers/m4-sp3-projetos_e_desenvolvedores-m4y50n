@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { QueryConfig, QueryResult } from "pg";
 import { client } from "../database";
+import { iValidateBody } from "../interfaces";
 
 //valid keys
 const validKeys: string[] = [
@@ -23,6 +24,7 @@ const validKeys: string[] = [
 		"description",
 		"estimatedTime",
 		"startDate",
+		"endDate",
 		"repository",
 		"developerID",
 	],
@@ -63,7 +65,7 @@ const verifyId = async (
 
 	const table: string = request.route.path.split("/").filter((i: any) => i)[0];
 
-	let queryText;
+	let queryText: string;
 
 	if (table === "developers") {
 		queryText = `
@@ -169,9 +171,9 @@ const validateRequiredDevKeys = async (
 		}
 	} else if (method.toLowerCase() === "patch") {
 		if (!validKeysDev.some((key: string) => Object.keys(body).includes(key))) {
-			return response
-				.status(400)
-				.json({ message: `Missing required keys: ${validKeysDev.join(", ")}` });
+			return response.status(400).json({
+				message: `Send at last one required key: ${validKeysDev.join(", ")}`,
+			});
 		}
 	}
 
@@ -198,7 +200,7 @@ const validateRequiredInfosKeys = async (
 			!validKeysInfos.some((key: string) => Object.keys(body).includes(key))
 		) {
 			return response.status(400).json({
-				message: `Missing required keys: ${validKeysInfos.join(", ")}`,
+				message: `Send at last one required key: ${validKeysInfos.join(", ")}`,
 			});
 		}
 	}
@@ -218,13 +220,13 @@ const validateRequiredProjKeys = async (
 			!validKeysProj.every((key: string) => Object.keys(body).includes(key))
 		) {
 			return response.status(400).json({
-				message: `Missing required keys: ${validKeysProj.join(", ")}`,
+				message: `Required keys are: ${validKeysProj.join(", ")}`,
 			});
 		}
 	} else if (method.toLowerCase() === "patch") {
 		if (!validKeysProj.some((key: string) => Object.keys(body).includes(key))) {
 			return response.status(400).json({
-				message: `Missing required keys: ${validKeysProj.join(", ")}`,
+				message: `Send at last one required key: ${validKeysProj.join(", ")}`,
 			});
 		}
 	}
