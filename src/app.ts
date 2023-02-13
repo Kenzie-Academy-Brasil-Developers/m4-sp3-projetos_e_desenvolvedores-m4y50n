@@ -31,6 +31,12 @@ app.get("/developers", getRequests.getAllDevelopers);
 
 app.get("/developers/:id", verifyId, getRequests.getDeveloper);
 
+app.get(
+	"/developers/:id/projects",
+	verifyId,
+	getRequests.getAllDeveloperProjects
+);
+
 app.post(
 	"/developers",
 	validateKeys,

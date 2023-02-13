@@ -167,7 +167,7 @@ const validateRequiredDevKeys = async (
 		if (!validKeysDev.every((key: string) => Object.keys(body).includes(key))) {
 			return response
 				.status(400)
-				.json({ message: `Missing required keys: ${validKeysDev.join(", ")}` });
+				.json({ message: `Required keys are: ${validKeysDev.join(", ")}` });
 		}
 	} else if (method.toLowerCase() === "patch") {
 		if (!validKeysDev.some((key: string) => Object.keys(body).includes(key))) {

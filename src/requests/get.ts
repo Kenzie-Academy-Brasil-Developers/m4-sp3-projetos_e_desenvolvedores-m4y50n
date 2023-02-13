@@ -57,6 +57,43 @@ const getDeveloper = async (
 	return response.status(200).json(queryResult.rows[0]);
 };
 
+const getAllDeveloperProjects = async (
+	request: Request,
+	response: Response
+): Promise<Response> => {
+	const id: number = parseInt(request.params.id);
+
+	const queryText: string = `
+		SELECT 
+			d."developerID", d."name" as "developerName", d.email, di."developerInfoID", 
+			di."developerSince", di."preferredOS", p."projectID", p."name" as "projectName", 
+			p.description, p."estimatedTime", p.repository, p."startDate", p."endDate", 
+			t."techID", t."name" as "techName"
+		FROM 
+			developer d 
+		LEFT JOIN 
+			developer_infos di ON d."developerID" = di."developerID" 
+		LEFT JOIN 
+			project p ON di."developerID" = p."developerID" 
+		LEFT JOIN 
+			project_technology pt  ON pt."projectID" =  p."projectID" 
+		LEFT JOIN 
+			technology t ON t."techID" = pt."techID" 
+		WHERE d."developerID" = $1;
+    `;
+
+	const queryConfig: QueryConfig = {
+		text: queryText,
+		values: [id],
+	};
+
+	const queryResult: QueryResult<iDeveloperInfos> = await client.query(
+		queryConfig
+	);
+
+	return response.status(200).json(queryResult.rows);
+};
+
 //projects
 const getAllProjects = async (
 	request: Request,
@@ -113,4 +150,10 @@ const getProject = async (
 	return response.status(200).json(queryResult.rows);
 };
 
-export { getAllDevelopers, getDeveloper, getAllProjects, getProject };
+export {
+	getAllDevelopers,
+	getDeveloper,
+	getAllDeveloperProjects,
+	getAllProjects,
+	getProject,
+};

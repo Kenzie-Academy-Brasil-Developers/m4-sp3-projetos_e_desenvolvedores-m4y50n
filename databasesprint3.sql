@@ -5,7 +5,7 @@ CREATE TYPE os AS ENUM ('windows', 'linux', 'macos');
 CREATE TABLE IF NOT EXISTS developer (
     "developerID" SERIAL PRIMARY KEY,
     name VARCHAR(50) NOT NULL,
-    email VARCHAR(50) NOT NULL
+    email VARCHAR(50) NOT NULL UNIQUE
 );
 
 CREATE TABLE IF NOT EXISTS developer_infos (
