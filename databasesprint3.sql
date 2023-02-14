@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS developer (
 CREATE TABLE IF NOT EXISTS developer_infos (
     "developerInfoID" SERIAL PRIMARY KEY,
     "developerSince" DATE NOT NULL,
-    "preferredOS" os,
+    "preferredOS" os NOT NULL,
     "developerID" INTEGER UNIQUE,
     FOREIGN KEY ("developerID") REFERENCES developer("developerID") ON DELETE CASCADE
 );
@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS developer_infos (
 CREATE TABLE IF NOT EXISTS project (
     "projectID" SERIAL PRIMARY KEY,
     name VARCHAR(50) NOT NULL,
-    description TEXT,
+    description TEXT NOT NULL,
     "estimatedTime" VARCHAR(20) NOT NULL,
     repository VARCHAR(120) NOT NULL,
     "startDate" DATE NOT NULL,
@@ -36,9 +36,9 @@ CREATE TABLE IF NOT EXISTS technology (
 CREATE TABLE IF NOT EXISTS project_technology (
     "projectTechID" SERIAL PRIMARY KEY,
     "addedIn" DATE NOT NULL,
-    "projectID" INTEGER,
+   	"projectID" INTEGER NOT NULL,
     FOREIGN KEY ("projectID") REFERENCES project("projectID") ON DELETE CASCADE,
-    "techID" INTEGER UNIQUE,
+    "techID" INTEGER NOT NULL,
     FOREIGN KEY ("techID") REFERENCES technology("techID") ON DELETE CASCADE
 );
 

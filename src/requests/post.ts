@@ -10,6 +10,7 @@ import {
 	iProjectTech,
 	iTech,
 } from "../interfaces";
+import { validateKeys } from "../middlewares";
 
 //developers
 const postDeveloper = async (
@@ -55,13 +56,31 @@ const postDeveloperInfos = async (
 			request.validatedBody
 		);
 
+	// verify if developer already has infos
+	const devHasInfo = await client.query({
+		text: `
+			SELECT 
+				* 
+			FROM 
+				developer_infos di 
+			WHERE di."developerID" = $1;
+			`,
+		values: [id],
+	});
+
+	if (devHasInfo.rows.length) {
+		return response
+			.status(400)
+			.json({ message: "Developer already has developerInfos" });
+	}
+
 	const queryText: string = `
-		INSERT INTO  
+		INSERT INTO
 			developer_infos(%I)
 		VALUES
 			(%L)
-		RETURNING *;
-	`;
+			RETURNING *;
+			`;
 
 	const queryValues = [
 		[...developerDataKey, "developerID"],
@@ -107,43 +126,75 @@ const postTechProject = async (
 ): Promise<Response> => {
 	const id: number = parseInt(request.params.id);
 
-	const developerDataKey: Array<string> = Object.keys(request.validatedBody),
-		developerDataValues: Array<string> = Object.values(request.validatedBody);
-
 	//verify if tech is in project
 	const queryVerifyName: QueryResult<string[]> = await client.query({
 		text: `
-		SELECT 
-			pro."projectID", pro.name, pro.description, pro."estimatedTime", pro.repository, 
-			pro."startDate", pro."endDate", pro."developerID", t."techID", t."name" as "techName"  
-		FROM 
-			project pro
-		LEFT JOIN 
-			project_technology pt on pro."projectID" = pt."projectID"
-		LEFT  JOIN   
-			technology t on t."techID" = pt."techID"
-		WHERE 
-			t."techID" = $1 and pt."projectID" = $2;`,
+			SELECT
+				pro."projectID", pro.name, pro.description, pro."estimatedTime", pro.repository,
+				pro."startDate", pro."endDate", pro."developerID", t."techID", t."name" as "techName"
+			FROM
+				project pro
+			LEFT JOIN
+				project_technology pt on pro."projectID" = pt."projectID"
+			LEFT  JOIN
+				technology t on t."techID" = pt."techID"
+			WHERE
+				t.name = $1 and pt."projectID" = $2;`,
 
-		values: [request.validatedBody.techID, id],
+		values: [request.validatedBody.name, id],
 	});
 
 	if (queryVerifyName.rows.length) {
 		return response.status(409).json({ message: "Tech already in project" });
 	}
-	////////////
+	//////////
+
+	//get id from tech
+	const QueryTechID = await client.query({
+		text: `SELECT 
+			"techID" 
+		FROM 
+			technology
+		WHERE name = $1;
+		`,
+		values: [request.validatedBody.name],
+	});
+
+	if (!QueryTechID.rows.length) {
+		return response.status(400).json({
+			message: "Invalid tech",
+			validTechs: [
+				"javascript",
+				"python",
+				"react",
+				"expressjs",
+				"html",
+				"css",
+				"django",
+				"postgresql",
+				"mongodb",
+			],
+		});
+	}
+
+	const techID = QueryTechID.rows[0].techID;
 
 	const queryText: string = `
-		INSERT INTO 
-			project_technology(%I) 
-		VALUES 
+		INSERT INTO
+			project_technology(%I)
+		VALUES
 			(%L)
 		RETURNING *;
 	`;
 
+	const data = new Date(),
+		day = String(data.getDate()).padStart(2, "0"),
+		month = String(data.getMonth() + 1).padStart(2, "0"),
+		year = data.getFullYear();
+
 	const queryValues = [
-		[...developerDataKey, "projectID"],
-		[...developerDataValues, id],
+		["addedIn", "techID", "projectID"],
+		[`${month}/${day}/${year}`, techID, id],
 	];
 
 	const queryConfig = format(queryText, ...queryValues);
@@ -152,18 +203,18 @@ const postTechProject = async (
 
 	const queryTechInfo: QueryResult<iProjectTech> = await client.query({
 		text: `
-		SELECT 
-			pro."projectID", pro.name, pro.description, pro."estimatedTime", pro.repository, 
-			pro."startDate", pro."endDate", pro."developerID", t."techID", t."name" as "techName"  
-		FROM 
-			project pro
-		LEFT JOIN 
-			project_technology pt on pro."projectID" = pt."projectID"
-		LEFT  JOIN   
-			technology t on t."techID" = pt."techID"
-		WHERE 
-			t."techID" = $1 and pt."projectID" = $2;`,
-		values: [request.validatedBody.techID, id],
+			SELECT
+				pro."projectID", pro.name, pro.description, pro."estimatedTime", pro.repository,
+				pro."startDate", pro."endDate", pro."developerID", t."techID", t."name" as "techName"
+			FROM
+				project pro
+			LEFT JOIN
+				project_technology pt on pro."projectID" = pt."projectID"
+			LEFT  JOIN
+				technology t on t."techID" = pt."techID"
+			WHERE
+				t."techID" = $1 and pt."projectID" = $2;`,
+		values: [techID, id],
 	});
 
 	return response.status(201).json(queryTechInfo.rows[0]);

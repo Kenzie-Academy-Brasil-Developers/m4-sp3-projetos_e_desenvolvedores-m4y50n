@@ -11,6 +11,7 @@ const validKeys: string[] = [
 		"estimatedTime",
 		"startDate",
 		"repository",
+		"endDate",
 		"developerID",
 		"developerSince",
 		"preferredOS",
@@ -24,11 +25,19 @@ const validKeys: string[] = [
 		"description",
 		"estimatedTime",
 		"startDate",
+		"repository",
+		"developerID",
+	],
+	validKeysProjPatch: string[] = [
+		"name",
+		"description",
+		"estimatedTime",
+		"startDate",
 		"endDate",
 		"repository",
 		"developerID",
 	],
-	validKeysTech: string[] = ["addedIn", "techID"];
+	validKeysTech: string[] = ["name"];
 
 //validate keys
 const validateKeys = async (
@@ -44,7 +53,18 @@ const validateKeys = async (
 
 	keys.forEach((key: any) => {
 		if (validKeys.includes(key)) {
-			newBody[key] = body[key];
+			newBody[key] =
+				key === "preferredOS" ? body[key].toLowerCase() : body[key];
+
+			if (
+				key === "preferredOS" &&
+				!["linux", "windows", "macos"].includes(newBody[key])
+			) {
+				return response.status(400).json({
+					message:
+						"Invalid value for preferredID, valid values are: linux, windows e macos",
+				});
+			}
 		}
 	});
 
@@ -224,7 +244,9 @@ const validateRequiredProjKeys = async (
 			});
 		}
 	} else if (method.toLowerCase() === "patch") {
-		if (!validKeysProj.some((key: string) => Object.keys(body).includes(key))) {
+		if (
+			!validKeysProjPatch.some((key: string) => Object.keys(body).includes(key))
+		) {
 			return response.status(400).json({
 				message: `Send at last one required key: ${validKeysProj.join(", ")}`,
 			});
