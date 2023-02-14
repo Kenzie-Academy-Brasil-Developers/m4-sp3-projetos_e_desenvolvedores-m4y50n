@@ -10,11 +10,11 @@ const getAllDevelopers = async (
 ): Promise<Response> => {
 	const queryText: string = `
 		SELECT  
-			d."developerID", d.name, d.email, di."developerInfoID", di."developerSince", di."preferredOS"  
+			d.id as "developerID", d.name, d.email, di.id as "developerInfoID", di."developerSince", di."preferredOS"  
 		FROM 
 			developer d 
 		LEFT JOIN 
-			developer_infos di  ON d."developerID" = di."developerID";
+			developer_infos di  ON d.id = di.id;
     `;
 
 	const queryConfig: QueryConfig = {
@@ -36,13 +36,13 @@ const getDeveloper = async (
 
 	const queryText: string = `
 		SELECT  
-			d."developerID", d.name, d.email, di."developerInfoID", di."developerSince", di."preferredOS"  
+			d.id as "developerID", d.name, d.email, di.id as "developerInfoID", di."developerSince", di."preferredOS"  
 		FROM 
 			developer d 
 		LEFT JOIN 
-			developer_infos di  ON d."developerID" = di."developerID"
+			developer_infos di  ON d.id = di.id
         WHERE 
-            d."developerID" = $1;
+            d.id = $1;
     `;
 
 	const queryConfig: QueryConfig = {
@@ -65,21 +65,21 @@ const getAllDeveloperProjects = async (
 
 	const queryText: string = `
 		SELECT 
-			d."developerID", d."name" as "developerName", d.email, di."developerInfoID", 
-			di."developerSince", di."preferredOS", p."projectID", p."name" as "projectName", 
+			d.id as "developerID", d.name, d.email, di.id as "developerInfoID", 
+			di."developerSince", di."preferredOS", p.id as "projectID", p."name" as "projectName", 
 			p.description, p."estimatedTime", p.repository, p."startDate", p."endDate", 
-			t."techID", t."name" as "techName"
+			t.id as "techID", t."name" as "techName"
 		FROM 
 			developer d 
 		LEFT JOIN 
-			developer_infos di ON d."developerID" = di."developerID" 
+			developer_infos di ON d.id = di.id 
 		LEFT JOIN 
-			project p ON di."developerID" = p."developerID" 
+			project p ON di.id = p."developerID" 
 		LEFT JOIN 
-			project_technology pt  ON pt."projectID" =  p."projectID" 
+			project_technology pt  ON pt."projectID" =  p.id 
 		LEFT JOIN 
-			technology t ON t."techID" = pt."techID" 
-		WHERE d."developerID" = $1;
+			technology t ON t.id = pt."techID" 
+		WHERE d.id = $1;
     `;
 
 	const queryConfig: QueryConfig = {
@@ -101,14 +101,14 @@ const getAllProjects = async (
 ): Promise<Response> => {
 	const queryText: string = `
 		SELECT 
-			pro."projectID", pro.name, pro.description, pro."estimatedTime", pro.repository, 
-			pro."startDate", pro."endDate", pro."developerID", t."techID", t."name" as "techName"  
+			pro.id as "projectID" , pro.name as "projectName", pro.description, pro."estimatedTime", pro.repository, 
+			pro."startDate", pro."endDate", pro."developerID", t.id as "techID", t."name" as "techName"  
 		FROM 
 			project pro
 		LEFT JOIN 
-			project_technology pt on pro."projectID" = pt."projectID"
+			project_technology pt on pro.id = pt.id
 		LEFT  JOIN   
-			technology t on t."techID" = pt."techID"
+			technology t on t.id = pt.id
 	`;
 
 	const queryConfig: QueryConfig = {
@@ -128,16 +128,16 @@ const getProject = async (
 
 	const queryText: string = `
 		SELECT 
-			pro."projectID", pro.name, pro.description, pro."estimatedTime", pro.repository, 
-			pro."startDate", pro."endDate", pro."developerID", t."techID", t."name" as "techName"  
+			pro.id as "projectID", pro.name as "projectName", pro.description, pro."estimatedTime", pro.repository, 
+			pro."startDate", pro."endDate", pro."developerID", t.id as "techID", t."name" as "techName"  
 		FROM 
 			project pro
 		LEFT JOIN 
-			project_technology pt on pro."projectID" = pt."projectID"
+			project_technology pt on pro.id = pt.id
 		LEFT  JOIN   
-			technology t on t."techID" = pt."techID"
+			technology t on t.id = pt.id
 		WHERE 
-			pro."projectID" = $1;
+			pro.id = $1;
 	`;
 
 	const queryConfig: QueryConfig = {
