@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { QueryConfig, QueryResult } from "pg";
+import { QueryResult } from "pg";
 import format from "pg-format";
 import { client } from "../database";
 import {
@@ -8,9 +8,7 @@ import {
 	iInfos,
 	iProject,
 	iProjectTech,
-	iTech,
 } from "../interfaces";
-import { validateKeys } from "../middlewares";
 
 //developers
 const postDeveloper = async (
@@ -101,6 +99,16 @@ const postProject = async (
 ): Promise<Response> => {
 	const developerDataKey: Array<string> = Object.keys(request.validatedBody),
 		developerDataValues: Array<string> = Object.values(request.validatedBody);
+
+	//verify if dev exists
+	const devExists = await client.query({
+		text: `SELECT * FROM developer d WHERE d."developerID" = $1`,
+		values: [request.validatedBody.developerID],
+	});
+	if (!devExists.rows.length) {
+		return response.status(404).json({ message: "Developer not found." });
+	}
+	/////
 
 	const queryText: string = `
 		INSERT INTO  

@@ -115,9 +115,9 @@ const verifyId = async (
 	const queryResult: QueryResult = await client.query(queryConfig);
 
 	if (!queryResult.rows.length && table === "developers") {
-		return response.status(400).json({ message: "Developer not found." });
+		return response.status(404).json({ message: "Developer not found." });
 	} else if (!queryResult.rows.length && table === "projects") {
-		return response.status(400).json({ message: "Project not found." });
+		return response.status(404).json({ message: "Project not found." });
 	}
 
 	return next();
@@ -144,10 +144,12 @@ const verifyTech = async (
 		values: [name],
 	};
 
-	const queryResult: any = await client.query(querySelectConfig);
+	const queryResult: QueryResult = await client.query(querySelectConfig);
+
+	request.techID = queryResult.rows[0].techID;
 
 	if (!queryResult.rows[0]) {
-		return response.status(400).json({ message: "Tech not found." });
+		return response.status(404).json({ message: "Tech not found." });
 	}
 
 	return next();
